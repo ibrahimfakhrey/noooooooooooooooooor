@@ -28,18 +28,7 @@ app=Flask(__name__)
 babel = Babel(app)
 
 appid="868c5469fc5add3122d3e7e8313c8f3e"
-# web = "https://api.openweathermap.org/data/3.0/onecall?lat=33.44&lon=-94.04&appid={868c5469fc5add3122d3e7e8313c8f3e}"
-# x= input("plese ebter the name of the city")
-# END_POINT="https://api.openweathermap.org/data/2.5/weather"
-# params={
-#     "q":"banha",
-#     "appid":appid
-#     ,"units":"metric"
-# }
-#
-# response=requests.get(END_POINT,params)
-# data=response.json()
-# temp=data["main"]["temp"]
+
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -121,11 +110,32 @@ def register():
         return redirect("/login")
     return render_template("register.html")
 
-@app.route("/dash")
+@app.route("/dash",methods=["GET","POST"])
 def dash():
-    
+
     if current_user.is_authenticated :
-         return f"welcom to your dash "
+        city="banha"
+        if request.method=="POST":
+            city=request.form.get("city")
+
+
+        web = "https://api.openweathermap.org/data/3.0/onecall?lat=33.44&lon=-94.04&appid={868c5469fc5add3122d3e7e8313c8f3e}"
+        END_POINT = "https://api.openweathermap.org/data/2.5/weather"
+        params = {
+            "q":city,
+            "appid": appid
+            , "units": "metric"
+        }
+        try:
+            response = requests.get(END_POINT, params)
+            data = response.json()
+
+            temp = data["main"]["temp"]
+            description=data["weather"][0]["description"]
+        except:
+            return f"somthing went wrong 404 {data}"
+
+        return render_template("dash.html",temp=int(temp),description=description,city_name=city)
     else:
         return redirect("/login")
 @app.route("/logout")
